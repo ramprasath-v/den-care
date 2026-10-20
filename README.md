@@ -1,8 +1,17 @@
 # CareCircle
 
-CareCircle is a synthetic care-coordination hackathon demo for families helping an older adult live independently. It combines an IAM-authenticated MCP service on Amazon Bedrock AgentCore with persistent incident state, approval-gated caregiver alerts, a one-shot follow-up, and a local Alexa-style browser client. It does not diagnose, prescribe, call emergency services, operate real Ring devices, or contact a real caregiver.
+CareCircle is a synthetic care-coordination hackathon demo for families helping an older adult live independently. It combines an IAM-authenticated MCP service on Amazon Bedrock AgentCore with persistent incident state, approval-gated caregiver alerts, a one-shot follow-up, and an Alexa+ style browser simulation. It does not diagnose, prescribe, call emergency services, operate real Ring devices, or contact a real caregiver.
 
 The full build was deployed and verified in `us-east-1` on 2026-09-20. The existing AgentCore runtime was updated in place; it and its `DEFAULT` endpoint are `READY`. The verified resource and integration report is [docs/full-build-completion.md](docs/full-build-completion.md), with the exact [28 private tools and four public MCP tools](docs/full-build-inventory.md).
+
+## Hackathon entry
+
+- **Primary track:** Alexa+, using the rules' simulated Alexa+ experience path. The browser is a voice-first simulation built with agentic tools. It is not an official Alexa device, Alexa voice integration, certified Alexa skill, or production medical product.
+- **Mini challenge:** AWS Builder. CareCircle runs a multi-service agentic pipeline using Amazon Bedrock with Claude Sonnet 4.6, Amazon Bedrock AgentCore, Strands Agents, DynamoDB, SNS, EventBridge Scheduler, Lambda, App Runner, CloudWatch Logs, Amazon Transcribe, and Amazon Polly.
+- **Additional implementation:** the AgentCore workload is a real self-hosted MCP server. It negotiates MCP protocol `2025-11-25` and uses Streamable HTTP at `/mcp`. CareCircle's Alexa+ eligibility is based on the documented simulation alternative, so it does not depend on representing the project as an official Alexa integration.
+- **Data and safety:** every person, medication record, event, contact, device, and appointment in the demo is synthetic. CareCircle records facts and coordinates approval-gated actions; it gives no diagnosis, treatment, or medication-dosing advice.
+
+The public repository is licensed under the [MIT License](LICENSE). Direct third-party components remain under their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Submission product feedback is in [docs/product-feedback.md](docs/product-feedback.md), and presenter/Devpost checks are in [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md).
 
 ## Live architecture
 
@@ -24,6 +33,8 @@ The six named agent roles are the Supervisor and five specialists. Exactly 28 pr
 ## Public HTTPS demo
 
 The current browser client is deployed at **https://9umkurqacc.us-east-1.awsapprunner.com**. AWS App Runner serves the existing Python/Starlette application from the private `carecircle/web` ECR repository and supplies the TLS certificate and public HTTPS endpoint. The browser calls only the Python server; it receives no AWS credentials. The App Runner instance role invokes the existing AgentCore runtime and `DEFAULT` endpoint, streams recorded audio to Amazon Transcribe, synthesizes speech with Amazon Polly, and reads privacy-safe progress events from the existing AgentCore CloudWatch log group. The deployment creates no VPC, NAT gateway, load balancer, certificate, domain, data store, or AgentCore runtime.
+
+The judge demo requires no account and no login. Open the HTTPS URL in Chrome, allow microphone access if testing voice, or use the typed fallback. It uses shared synthetic state, so the project owner should run the scoped reset immediately before recording and before the judging period. The reset is deliberately not exposed as an unauthenticated public endpoint. If the hosted deployment is unavailable, judges can review the complete source and run the offline tests below; running the live local client requires credentials for an AWS deployment with the documented resources.
 
 To publish a new frozen web image, choose a new immutable tag and update the same stack:
 
@@ -57,19 +68,68 @@ aws cloudformation wait stack-delete-complete --region us-east-1 --stack-name Ca
 
 The three tables are `CareCircleCareProfiles`, `CareCircleCareEvents`, and `CareCircleActionLedger`. All seeded people, medication records, routine events, and contact details are synthetic. The SNS subscriber writes a demo-inbox event through `CareCircleFollowUp`; it does not deliver to a person. Follow-up schedules are one-shot and request automatic deletion. A missed follow-up creates a backup-caregiver action that still requires approval.
 
-## Run and verify
+## AWS service responsibilities
 
-Requirements: Python 3.11+, the locked dependencies, and AWS credentials for the non-root `carecircle-admin` profile. Set `AWS_REGION=us-east-1` and `BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6`. No AWS credentials are stored in the repository or sent to the browser.
+| Service or SDK | Runtime use |
+| --- | --- |
+| Amazon Bedrock / Claude Sonnet 4.6 | Strands Supervisor planning and bounded triage signal extraction; deterministic Python retains safety and approval authority. |
+| Amazon Bedrock AgentCore | Hosts the IAM-authenticated MCP runtime and `DEFAULT` endpoint. |
+| Strands Agents | Implements the Supervisor's agents-as-tools advisory plan across five specialist roles. |
+| DynamoDB | Persists synthetic profiles, care events, incidents, and the action ledger. |
+| SNS | Publishes an approved caregiver alert to a synthetic Lambda-backed demo inbox. |
+| EventBridge Scheduler and Lambda | Runs a one-shot follow-up and records follow-up state. |
+| App Runner and ECR | Serve the existing Python/browser app over public HTTPS from a private container repository. |
+| CloudWatch Logs | Stores privacy-safe orchestration/progress records consumed by the live progress panel. |
+| Amazon Transcribe and Polly | Convert browser PCM to text and natural summaries to speech on the server. |
+| CloudFormation, CDK, CodeBuild, KMS, and IAM | Define, build, encrypt, and authorize the reviewed deployment resources. |
+
+## MCP implementation
+
+`src/carecircle/app.py` is the server entry point. It uses the Python MCP SDK's `FastMCP`, `transport="streamable-http"`, a stateless `/mcp` endpoint, and four public tools: `coordinate_care_request`, `get_household_briefing`, `confirm_action`, and `get_incident_status`. `src/carecircle/remote.py` initializes each AgentCore session with protocol version `2025-11-25` and rejects a different negotiated version. The browser never calls AgentCore directly; it calls the Python web server, which uses its IAM role to invoke the MCP runtime.
+
+## Local setup, run, and verify
+
+Requirements: Git, Python 3.11+, and `uv`. Docker, Node.js 20+, the AWS CLI, and the AgentCore CLI are needed only for the corresponding container and infrastructure workflows. Unit tests do not require AWS credentials. Live tests and the local browser connected to the deployed runtime require a non-root AWS profile with access to the documented CareCircle resources. No AWS credentials are stored in the repository or sent to the browser.
 
 ```bash
-cd /Users/ramprasath/Documents/ChatGPT/CareCircle
+git clone https://github.com/ramprasath-v/care-circle.git
+cd care-circle
+python3.11 -m venv .venv
+.venv/bin/python -m pip install uv
+.venv/bin/uv sync --frozen --dev
+.venv/bin/python -m pip install -r requirements-voice.txt
 PYTHONPATH=src .venv/bin/python -m pytest -q
+node --check src/carecircle/web_assets/app.js
+node tests/ui_state_refresh.cjs
+```
+
+For live AWS checks, authenticate with a non-root profile and configure the deployed runtime:
+
+```bash
 export AWS_PROFILE=carecircle-admin
 export AWS_REGION=us-east-1
 export BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-6
 export AGENT_RUNTIME_ARN=arn:aws:bedrock-agentcore:us-east-1:109837542034:runtime/CareCirclePhase3_CareCircleMcp-XjLaBWDGYa
+aws sts get-caller-identity --profile "$AWS_PROFILE"
 PYTHONPATH=src .venv/bin/python scripts/test_full_remote.py
 ```
+
+Configuration is read from environment variables; `.env.example` contains safe defaults and no credentials.
+
+| Variable | Purpose |
+| --- | --- |
+| `AWS_PROFILE` | Optional local non-root AWS profile; App Runner and AgentCore use IAM roles instead. |
+| `AWS_REGION` | AWS region, verified with `us-east-1`. |
+| `BEDROCK_MODEL_ID` | Bedrock inference profile, verified with `us.anthropic.claude-sonnet-4-6`. |
+| `AGENT_RUNTIME_ARN` | Existing AgentCore runtime used by the local/public web client. |
+| `CARE_PROFILES_TABLE`, `CARE_EVENTS_TABLE`, `ACTION_LEDGER_TABLE` | DynamoDB tables used by the deployed MCP runtime. |
+| `CAREGIVER_ALERT_TOPIC_ARN` | SNS topic for approved synthetic caregiver alerts. |
+| `FOLLOW_UP_LAMBDA_ARN`, `FOLLOW_UP_SCHEDULER_ROLE_ARN` | One-shot follow-up target and Scheduler execution role. |
+| `DEMO_MODE` | Keeps device control and caregiver delivery in documented demo behavior. |
+| `CARECIRCLE_WEB_PORT` | Optional local browser-server port; defaults to `8765`. |
+| `SUPERVISOR_TIMEOUT_SECONDS`, `LOG_LEVEL` | Runtime timeout and logging controls. |
+
+Deployed values are defined in `infra/agentcore/CareCirclePhase3/agentcore/agentcore.json` and `infra/web-hosting.yaml`. Checked-in account `000000000000` values are placeholders; local SSO credentials, `.env`, and generated deployment targets must remain untracked.
 
 The remote test calls all four MCP tools, validates their Pydantic responses, approves a synthetic caregiver alert, checks persisted status, and prints total latency. It creates a new synthetic incident, sends one SNS message to the demo inbox, and schedules one follow-up. The 2026-09-20 run passed in 53.4 seconds. CloudWatch recorded Claude Sonnet 4.6 invocations in the same test window and privacy-safe orchestration logs for Supervisor, Triage, policy, Medication, Home Safety, and Care Coordinator. A later status call confirmed `FOLLOW_UP_DUE` and a pending backup action.
 
@@ -81,7 +141,7 @@ PYTHONPATH=src .venv/bin/python -m carecircle.web
 # Visit http://127.0.0.1:8765
 ```
 
-The web server binds to localhost and signs MCP requests server-side. If port 8765 is occupied, set `CARECIRCLE_WEB_PORT=8766` and visit that port. Restart the local web server and reload the page after code updates so both voice-intent routing and browser state use the new version. Tap the microphone, grant microphone access to localhost, speak for 1–20 seconds, then tap again. The browser converts mono microphone samples to 16 kHz PCM; the server streams that clip to Amazon Transcribe. CareCircle routes the transcript through the same four MCP tools, reads session-correlated metadata-only progress from the existing AgentCore CloudWatch log group, and sends a separate natural summary of the structured result through Amazon Polly (Ruth neural voice). Voice on/off and replay controls sit beneath the microphone. Typed prompts remain available. The browser retains the current incident, safety-question state, and pending action IDs between turns. A single action accepts Yes/Approve/Go ahead or No/Reject/Cancel; multiple pending actions accept Approve All or Reject All, with a Review Individually option. The browser receives no AWS credentials. This remains a local demo client, not a public hosted site.
+The web server binds to localhost and signs MCP requests server-side. If port 8765 is occupied, set `CARECIRCLE_WEB_PORT=8766` and visit that port. Restart the local web server and reload the page after code updates so both voice-intent routing and browser state use the new version. Tap the microphone, grant microphone access to localhost, speak for 1–20 seconds, then tap again. The browser converts mono microphone samples to 16 kHz PCM; the server streams that clip to Amazon Transcribe. CareCircle routes the transcript through the same four MCP tools, reads session-correlated metadata-only progress from the existing AgentCore CloudWatch log group, and sends a separate natural summary of the structured result through Amazon Polly (Ruth neural voice). Voice on/off and replay controls sit beneath the microphone. Typed prompts remain available. The browser retains the current incident, safety-question state, and pending action IDs between turns. A single action accepts Yes/Approve/Go ahead or No/Reject/Cancel; multiple pending actions accept Approve All or Reject All, with a Review Individually option. The browser receives no AWS credentials. The same application is deployed publicly through App Runner; localhost is the development and fallback path.
 
 Run the live speech loop without microphone hardware, then verify real remote progress:
 
@@ -135,3 +195,7 @@ The state-isolation verification reran the remote flow with intermediate status 
 The conversation-state regression run also verified the revised order: after John’s alert, “Also help with the rest of Dad’s day” presents a grouped three-draft card; “Approve all” confirms the three current ledger IDs and leaves each request in the approved `DRAFT` state. It does not create another incident, send another caregiver alert, book a ride, order medication, or change the plug or dose. The updated live run observed 6/6 agents and 28/28 private tools, followed by a typed browser pass through the same sequence. Both synthetic verification incidents were reset; the final reset verified plug ON and no active voice incident.
 
 The final remote briefing also excludes older unrelated incidents from the fresh demo generation while retaining those historical records. It returned medication unresolved, plug ON, Maya unavailable, John available, the 14:30 appointment, and no current demo incident after reset.
+
+## License and ownership
+
+CareCircle source authored for this project is available under the MIT License. The submission must list only contributors who own or are authorized to submit their work. Amazon service names and third-party project names identify integrations and do not imply endorsement. Upstream packages, container components, and generated AgentCore/CDK scaffolding retain their respective licenses and notices.
