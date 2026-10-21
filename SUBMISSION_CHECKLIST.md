@@ -4,7 +4,7 @@ The official rules remain authoritative: <https://amazonappdev2026.devpost.com/r
 
 ## Repository and access
 
-- [ ] Commit and push the compliance files and final tested source to `https://github.com/ramprasath-v/care-circle`.
+- [ ] Commit and push the compliance files and final tested source to `https://github.com/ramprasath-v/den-care`.
 - [ ] Confirm the repository remains public and GitHub detects the root MIT `LICENSE` in the repository header/About area.
 - [ ] Put the repository URL in the Devpost submission.
 - [ ] Confirm the public demo returns HTTP 200 with no login: <https://9umkurqacc.us-east-1.awsapprunner.com/>.

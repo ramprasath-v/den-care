@@ -92,7 +92,7 @@ The three tables are `CareCircleCareProfiles`, `CareCircleCareEvents`, and `Care
 Requirements: Git, Python 3.11+, and `uv`. Docker, Node.js 20+, the AWS CLI, and the AgentCore CLI are needed only for the corresponding container and infrastructure workflows. Unit tests do not require AWS credentials. Live tests and the local browser connected to the deployed runtime require a non-root AWS profile with access to the documented project resources. No AWS credentials are stored in the repository or sent to the browser.
 
 ```bash
-git clone https://github.com/ramprasath-v/care-circle.git
+git clone https://github.com/ramprasath-v/den-care.git
 cd care-circle
 python3.11 -m venv .venv
 .venv/bin/python -m pip install uv
