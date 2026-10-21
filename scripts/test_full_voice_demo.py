@@ -1,4 +1,4 @@
-"""Live seven-scene CareCircle demo through the four public MCP tools and SSE bridge.
+"""Live seven-scene Den demo through the four public MCP tools and SSE bridge.
 
 Run reset_voice_demo.py --apply first. This script creates a synthetic incident,
 SNS demo-inbox alert, one-shot follow-up, a simulated device action and drafts.

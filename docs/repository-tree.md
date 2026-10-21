@@ -1,4 +1,4 @@
-# CareCircle repository tree
+# Den repository tree
 
 Source and review artifacts; generated dependencies and CDK output omitted.
 

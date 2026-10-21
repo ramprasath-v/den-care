@@ -16,7 +16,7 @@ The official rules remain authoritative: <https://amazonappdev2026.devpost.com/r
 
 - [ ] Select **Alexa+** as the Primary Track.
 - [ ] Select **AWS Builder** as the Mini Challenge.
-- [ ] Describe CareCircle as a **simulated Alexa+ experience**. Do not call it an official Alexa skill, official Alexa voice integration, or certified Alexa product.
+- [ ] Describe Den as a **simulated Alexa+ experience**. Do not call it an official Alexa skill, official Alexa voice integration, or certified Alexa product.
 - [ ] Explain the real MCP `2025-11-25` Streamable HTTP server as an additional implementation detail.
 - [ ] Include a clear English description of features and functionality.
 - [ ] Paste or adapt the factual feedback from `docs/product-feedback.md` for every tool/API/SDK used.

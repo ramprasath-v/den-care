@@ -1,4 +1,4 @@
-# CareCircle full-build verification — 2026-09-20
+# Den full-build verification — 2026-09-20
 
 The approved full build is deployed in `us-east-1` under the non-root
 `carecircle-admin` SSO session. `CareCircleFullBuild`, `CareCirclePhase3Prerequisites`,

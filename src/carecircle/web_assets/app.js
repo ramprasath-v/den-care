@@ -10,6 +10,10 @@ const AGENTS = [
   "Care Coordinator Agent",
   "Logistics & Routine Agent",
 ];
+const displayComponent = (name) =>
+  name === "CareCircle Supervisor" ? "Den Supervisor" : name || "Den";
+const displayBrand = (text) =>
+  typeof text === "string" ? text.replaceAll("CareCircle", "Den") : text;
 const TOOL_GROUPS = {
   "Triage Agent": [
     "create_incident",
@@ -248,7 +252,8 @@ function renderAgents() {
     const el = document.createElement("div");
     el.className = "agent " + (observedAgents.has(agent) ? "done" : "");
     el.textContent =
-      (observedAgents.has(agent) ? "✓ " : "○ ") + agent.replace(" Agent", "");
+      (observedAgents.has(agent) ? "✓ " : "○ ") +
+      displayComponent(agent).replace(" Agent", "");
     root.append(el);
   }
 }
@@ -276,7 +281,7 @@ function progress(e) {
   renderCoverage();
   const el = document.createElement("div");
   el.className = "step " + state;
-  el.textContent = `${e.component || "CareCircle"} · ${e.operation || ""} · ${state}${e.latency_ms == null ? "" : ` · ${Math.round(e.latency_ms)} ms`}${e.provider ? " · " + e.provider : ""}`;
+  el.textContent = `${displayComponent(e.component)} · ${e.operation || ""} · ${state}${e.latency_ms == null ? "" : ` · ${Math.round(e.latency_ms)} ms`}${e.provider ? " · " + e.provider : ""}`;
   $("#trace").prepend(el);
   if (
     [
@@ -341,7 +346,7 @@ async function speak(text) {
   } catch (e) {
     if (e.name !== "AbortError")
       error(
-        `CareCircle voice unavailable: ${e.message}. The text response remains visible.`,
+        `Den voice unavailable: ${e.message}. The text response remains visible.`,
       );
   }
 }
@@ -518,11 +523,12 @@ function voiceStatus(value) {
     ...(appointment ? [appointment] : []),
   ].join(" ");
 }
-function summary(text, title = "CareCircle update", spokenText = null) {
-  $("#summary-title").textContent = title;
-  $("#summary").textContent = text;
-  line(text, "assistant");
-  if (spokenText) speak(spokenText);
+function summary(text, title = "Den update", spokenText = null) {
+  const visibleText = displayBrand(text);
+  $("#summary-title").textContent = displayBrand(title);
+  $("#summary").textContent = visibleText;
+  line(visibleText, "assistant");
+  if (spokenText) speak(displayBrand(spokenText));
 }
 function factCards(facts) {
   const root = $("#summary-grid");
@@ -819,9 +825,9 @@ async function confirmAll(approved) {
   }
 }
 async function job(operation, args) {
-  if (busy) throw new Error("CareCircle is already working");
+  if (busy) throw new Error("Den is already working");
   busy = true;
-  $("#working-label-text").textContent = "CareCircle is working";
+  $("#working-label-text").textContent = "Den is working";
   $("#working-spinner").hidden = false;
   $("#send").disabled = true;
   $("#mic").disabled = true;
@@ -884,7 +890,7 @@ async function job(operation, args) {
   } finally {
     busy = false;
     if (activeTurnTiming) activeTurnTiming.working_false_ms = timingNow();
-    $("#working-label-text").textContent = "CareCircle is ready";
+    $("#working-label-text").textContent = "Den is ready";
     $("#working-spinner").hidden = true;
     $("#send").disabled = false;
     $("#mic").disabled = transcribing;
@@ -895,7 +901,7 @@ function classifyCareIntent(text) {
   const phrase = text
     .toLowerCase()
     .replaceAll("’", "'")
-    .replace(/^carecircle[,\s]+/, "")
+    .replace(/^(?:den|carecircle)[,\s]+/, "")
     .trim();
   const safetyAnswer =
     /\b(?:awake and responsive|not awake|unresponsive|no chest pain|chest pain|breathing trouble|difficulty breathing|trouble breathing|difficulty speaking|trouble speaking)\b/.test(

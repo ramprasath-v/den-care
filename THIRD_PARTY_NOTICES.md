@@ -1,6 +1,6 @@
 # Third-party software and services
 
-CareCircle depends on third-party open-source packages and hosted AWS services. Those components are not relicensed by CareCircle's MIT License. Their original licenses and service terms continue to apply.
+Den depends on third-party open-source packages and hosted AWS services. Those components are not relicensed by Den's MIT License. Their original licenses and service terms continue to apply.
 
 The locked Python environment currently includes these direct dependencies:
 

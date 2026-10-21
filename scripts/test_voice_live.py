@@ -23,7 +23,7 @@ async def main():
     with response['AudioStream'] as stream:
         pcm = stream.read()
     transcript = await AmazonTranscribeProvider(region, profile).transcribe(pcm)
-    speech = AmazonPollyProvider(region, profile).synthesize('CareCircle is ready to coordinate care.')
+    speech = AmazonPollyProvider(region, profile).synthesize('Den is ready to coordinate care.')
     print({'transcript': transcript.text, 'transcribe_provider': transcript.provider,
            'transcribe_latency_ms': transcript.latency_ms, 'polly_bytes': len(speech.content),
            'polly_voice': speech.voice, 'end_to_end_ms': round((perf_counter()-started)*1000)})
@@ -50,7 +50,7 @@ async def main():
         if not results:
             raise RuntimeError('Live voice request did not return a briefing')
         briefing = HouseholdBriefing.model_validate(results[0]['value'])
-        reply = f"CareCircle checked the household. There are {len(briefing.open_care_tasks)} open care tasks."
+        reply = f"Den checked the household. There are {len(briefing.open_care_tasks)} open care tasks."
         audio = await web.post('/api/speak', json={'text':reply})
         audio.raise_for_status()
         print({'web_transcript':spoken_text,'mcp_tool':'get_household_briefing',

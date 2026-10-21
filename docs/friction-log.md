@@ -1,6 +1,6 @@
-# CareCircle AgentCore friction log
+# Den AgentCore friction log
 
-Only issues observed while preparing or deploying CareCircle are recorded here.
+Only issues observed while preparing or deploying Den are recorded here. Historical entries retain the former CareCircle branding where it identifies exact deployed resources, log values, commands, or observations made before the rename.
 
 ## AWS CLI session had expired
 

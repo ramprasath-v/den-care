@@ -1,8 +1,8 @@
-# CareCircle product feedback
+# Den product feedback
 
-This feedback records tools and services actually used while building and verifying CareCircle. It is based on the repository's deployment records and [friction log](friction-log.md).
+This feedback records tools and services actually used while building and verifying Den. It is based on the repository's deployment records and [friction log](friction-log.md).
 
-| Tool, API, or SDK | What CareCircle used it for | What worked well | What needs improvement | Onboarding experience | Use again? |
+| Tool, API, or SDK | What Den used it for | What worked well | What needs improvement | Onboarding experience | Use again? |
 | --- | --- | --- | --- | --- | --- |
 | Amazon Bedrock with Claude Sonnet 4.6 | Advisory Supervisor planning and bounded triage signal extraction through the US inference profile | The Strands integration returned useful specialist selections while deterministic code retained safety and approval decisions. Live logs confirmed real model invocation. | Model and cross-region inference-profile ARN permissions were easy to scope incorrectly. Clearer examples for profile IDs and all required foundation-model ARNs would reduce setup time. | Model discovery and a live invoke check were necessary before deployment. | Yes, for bounded reasoning behind deterministic policy controls. |
 | Amazon Bedrock AgentCore Runtime and CLI | Hosted the IAM-authenticated ARM64 MCP container and endpoint | Managed runtime, IAM authorization, container deployment, CloudWatch integration, and the MCP protocol fit the project well. | Deployment required several control-plane permissions that were discovered through CloudFormation rollback: endpoint lifecycle, workload identity parent/child resources, tagging, service-linked-role creation, and generated helper resources. A complete least-privilege deployment-policy reference and preflight would help. | The runtime itself was straightforward after the deployment prerequisites were understood; failed-stack recovery was the longest part. | Yes, with a reviewed deployment role and synthesized-name preflight. |

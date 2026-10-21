@@ -1,4 +1,4 @@
-"""Invoke the local CareCircle MCP endpoint using the official SDK."""
+"""Invoke the local Den MCP endpoint using the official SDK."""
 import argparse
 import asyncio
 import json

@@ -1,15 +1,15 @@
-# CareCircle
+# Den
 
-CareCircle is a synthetic care-coordination hackathon demo for families helping an older adult live independently. It combines an IAM-authenticated MCP service on Amazon Bedrock AgentCore with persistent incident state, approval-gated caregiver alerts, a one-shot follow-up, and an Alexa+ style browser simulation. It does not diagnose, prescribe, call emergency services, operate real Ring devices, or contact a real caregiver.
+**Den — care coordination for home and family.** Den is a synthetic care-coordination hackathon demo for families helping an older adult live independently. It combines an IAM-authenticated MCP service on Amazon Bedrock AgentCore with persistent incident state, approval-gated caregiver alerts, a one-shot follow-up, and an Alexa+ style browser simulation. It does not diagnose, prescribe, call emergency services, operate real Ring devices, or contact a real caregiver.
 
 The full build was deployed and verified in `us-east-1` on 2026-09-20. The existing AgentCore runtime was updated in place; it and its `DEFAULT` endpoint are `READY`. The verified resource and integration report is [docs/full-build-completion.md](docs/full-build-completion.md), with the exact [28 private tools and four public MCP tools](docs/full-build-inventory.md).
 
 ## Hackathon entry
 
 - **Primary track:** Alexa+, using the rules' simulated Alexa+ experience path. The browser is a voice-first simulation built with agentic tools. It is not an official Alexa device, Alexa voice integration, certified Alexa skill, or production medical product.
-- **Mini challenge:** AWS Builder. CareCircle runs a multi-service agentic pipeline using Amazon Bedrock with Claude Sonnet 4.6, Amazon Bedrock AgentCore, Strands Agents, DynamoDB, SNS, EventBridge Scheduler, Lambda, App Runner, CloudWatch Logs, Amazon Transcribe, and Amazon Polly.
-- **Additional implementation:** the AgentCore workload is a real self-hosted MCP server. It negotiates MCP protocol `2025-11-25` and uses Streamable HTTP at `/mcp`. CareCircle's Alexa+ eligibility is based on the documented simulation alternative, so it does not depend on representing the project as an official Alexa integration.
-- **Data and safety:** every person, medication record, event, contact, device, and appointment in the demo is synthetic. CareCircle records facts and coordinates approval-gated actions; it gives no diagnosis, treatment, or medication-dosing advice.
+- **Mini challenge:** AWS Builder. Den runs a multi-service agentic pipeline using Amazon Bedrock with Claude Sonnet 4.6, Amazon Bedrock AgentCore, Strands Agents, DynamoDB, SNS, EventBridge Scheduler, Lambda, App Runner, CloudWatch Logs, Amazon Transcribe, and Amazon Polly.
+- **Additional implementation:** the AgentCore workload is a real self-hosted MCP server. It negotiates MCP protocol `2025-11-25` and uses Streamable HTTP at `/mcp`. Den's Alexa+ eligibility is based on the documented simulation alternative, so it does not depend on representing the project as an official Alexa integration.
+- **Data and safety:** every person, medication record, event, contact, device, and appointment in the demo is synthetic. Den records facts and coordinates approval-gated actions; it gives no diagnosis, treatment, or medication-dosing advice.
 
 The public repository is licensed under the [MIT License](LICENSE). Direct third-party components remain under their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Submission product feedback is in [docs/product-feedback.md](docs/product-feedback.md), and presenter/Devpost checks are in [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md).
 
@@ -20,7 +20,7 @@ Chrome browser over App Runner HTTPS
   → Python/Starlette server with App Runner instance-role credentials
   → server-side IAM-authenticated MCP client
   → AgentCore Runtime /mcp
-  → CareCircle Supervisor (Strands, Claude Sonnet 4.6)
+  → Den Supervisor (internal component: CareCircle Supervisor; Strands, Claude Sonnet 4.6)
   → Triage → deterministic red-flag policy
   → Medication / Home Safety / Care Coordinator / Logistics & Routine
   → DynamoDB incident + ActionLedger
@@ -89,7 +89,7 @@ The three tables are `CareCircleCareProfiles`, `CareCircleCareEvents`, and `Care
 
 ## Local setup, run, and verify
 
-Requirements: Git, Python 3.11+, and `uv`. Docker, Node.js 20+, the AWS CLI, and the AgentCore CLI are needed only for the corresponding container and infrastructure workflows. Unit tests do not require AWS credentials. Live tests and the local browser connected to the deployed runtime require a non-root AWS profile with access to the documented CareCircle resources. No AWS credentials are stored in the repository or sent to the browser.
+Requirements: Git, Python 3.11+, and `uv`. Docker, Node.js 20+, the AWS CLI, and the AgentCore CLI are needed only for the corresponding container and infrastructure workflows. Unit tests do not require AWS credentials. Live tests and the local browser connected to the deployed runtime require a non-root AWS profile with access to the documented project resources. No AWS credentials are stored in the repository or sent to the browser.
 
 ```bash
 git clone https://github.com/ramprasath-v/care-circle.git
@@ -141,7 +141,7 @@ PYTHONPATH=src .venv/bin/python -m carecircle.web
 # Visit http://127.0.0.1:8765
 ```
 
-The web server binds to localhost and signs MCP requests server-side. If port 8765 is occupied, set `CARECIRCLE_WEB_PORT=8766` and visit that port. Restart the local web server and reload the page after code updates so both voice-intent routing and browser state use the new version. Tap the microphone, grant microphone access to localhost, speak for 1–20 seconds, then tap again. The browser converts mono microphone samples to 16 kHz PCM; the server streams that clip to Amazon Transcribe. CareCircle routes the transcript through the same four MCP tools, reads session-correlated metadata-only progress from the existing AgentCore CloudWatch log group, and sends a separate natural summary of the structured result through Amazon Polly (Ruth neural voice). Voice on/off and replay controls sit beneath the microphone. Typed prompts remain available. The browser retains the current incident, safety-question state, and pending action IDs between turns. A single action accepts Yes/Approve/Go ahead or No/Reject/Cancel; multiple pending actions accept Approve All or Reject All, with a Review Individually option. The browser receives no AWS credentials. The same application is deployed publicly through App Runner; localhost is the development and fallback path.
+The web server binds to localhost and signs MCP requests server-side. If port 8765 is occupied, set `CARECIRCLE_WEB_PORT=8766` and visit that port. Restart the local web server and reload the page after code updates so both voice-intent routing and browser state use the new version. Tap the microphone, grant microphone access to localhost, speak for 1–20 seconds, then tap again. The browser converts mono microphone samples to 16 kHz PCM; the server streams that clip to Amazon Transcribe. Den routes the transcript through the same four MCP tools, reads session-correlated metadata-only progress from the existing AgentCore CloudWatch log group, and sends a separate natural summary of the structured result through Amazon Polly (Ruth neural voice). Voice on/off and replay controls sit beneath the microphone. Typed prompts remain available. The browser retains the current incident, safety-question state, and pending action IDs between turns. A single action accepts Yes/Approve/Go ahead or No/Reject/Cancel; multiple pending actions accept Approve All or Reject All, with a Review Individually option. The browser receives no AWS credentials. The same application is deployed publicly through App Runner; localhost is the development and fallback path.
 
 Run the live speech loop without microphone hardware, then verify real remote progress:
 
@@ -150,13 +150,13 @@ PYTHONPATH=src .venv/bin/python scripts/test_voice_live.py
 PYTHONPATH=src .venv/bin/python scripts/test_live_progress.py
 ```
 
-The speech check synthesizes a test phrase as 16 kHz PCM through Polly, transcribes it with Amazon Transcribe, and synthesizes the final CareCircle voice MP3. The progress check creates a synthetic incident and validates a live CareResponse; it does not approve a proposed action. Voice and progress use the local `carecircle-admin` SSO session, so there are no new persistent AWS resources or runtime-role permissions. Runtime progress instrumentation was updated in place in the existing AgentCore container; the role and four-tool MCP surface were unchanged.
+The speech check synthesizes a test phrase as 16 kHz PCM through Polly, transcribes it with Amazon Transcribe, and synthesizes the final Den voice MP3. The progress check creates a synthetic incident and validates a live CareResponse; it does not approve a proposed action. Voice and progress use the local `carecircle-admin` SSO session, so there are no new persistent AWS resources or runtime-role permissions. Runtime progress instrumentation was updated in place in the existing AgentCore container; the role and four-tool MCP surface were unchanged.
 
 The source-of-truth infrastructure is [infra/full-build.yaml](infra/full-build.yaml) and [infra/iam/phase3-prerequisites.yaml](infra/iam/phase3-prerequisites.yaml). The reviewed AWS resource set and the Scheduler trust correction are in [infra/full-build-review.md](infra/full-build-review.md). AgentCore config is in [infra/agentcore/CareCirclePhase3/agentcore/agentcore.json](infra/agentcore/CareCirclePhase3/agentcore/agentcore.json); its `000000000000` values are portable placeholders, not deployed account values. The temporary Phase 3 deployment policy remains version `v9` and was not tightened during the full-build update. [docs/friction-log.md](docs/friction-log.md) records deployment issues and fixes.
 
 ## Safety and scope
 
-CareCircle uses a deterministic emergency red-flag short circuit and never makes a diagnosis or dosing decision. Medication status is a recorded fact, not advice. Alerts, simulated device changes, purchases, and bookings pass through an explicit action policy. Refill, ride, and supply requests remain drafts. Runtime logs omit utterances, prompts, medication content, and credentials. Real identity, consent, caregiver delivery, and device integrations would require separate product and security work.
+Den uses a deterministic emergency red-flag short circuit and never makes a diagnosis or dosing decision. Medication status is a recorded fact, not advice. Alerts, simulated device changes, purchases, and bookings pass through an explicit action policy. Refill, ride, and supply requests remain drafts. Runtime logs omit utterances, prompts, medication content, and credentials. Real identity, consent, caregiver delivery, and device integrations would require separate product and security work.
 
 ## Current voice demo
 
@@ -172,7 +172,7 @@ PYTHONPATH=src .venv/bin/python scripts/reset_voice_demo.py --apply
 PYTHONPATH=src .venv/bin/python -m carecircle.web
 ```
 
-Use the exact ten-turn transcript in [docs/current-demo-script.md](docs/current-demo-script.md). It is derived from the current seed and code, includes the complete safety-answer turn, and was verified verbatim through typed browser input. Wait for each result and late progress events before continuing. The scripted concern lets CareCircle discover Maya's unavailability and John's backup role from the saved household profile.
+Use the exact ten-turn transcript in [docs/current-demo-script.md](docs/current-demo-script.md). It is derived from the current seed and code, includes the complete safety-answer turn, and was verified verbatim through typed browser input. Wait for each result and late progress events before continuing. The scripted concern lets Den discover Maya's unavailability and John's backup role from the saved household profile.
 
 The expandable **Full tool coverage** panel turns an existing private tool green only after a successful real runtime progress event. The panel reached 28/28 in the automated live run. A full hardware-free integration rehearsal uses the same four public MCP endpoints and SSE bridge:
 
@@ -198,4 +198,4 @@ The final remote briefing also excludes older unrelated incidents from the fresh
 
 ## License and ownership
 
-CareCircle source authored for this project is available under the MIT License. The submission must list only contributors who own or are authorized to submit their work. Amazon service names and third-party project names identify integrations and do not imply endorsement. Upstream packages, container components, and generated AgentCore/CDK scaffolding retain their respective licenses and notices.
+Den source authored for this project is available under the MIT License. The submission must list only contributors who own or are authorized to submit their work. Amazon service names and third-party project names identify integrations and do not imply endorsement. Upstream packages, container components, and generated AgentCore/CDK scaffolding retain their respective licenses and notices.

@@ -119,7 +119,7 @@ def create_web_app(remote: RemoteCareCircle | None = None, *,
 
         async def run():
             await queue.put({"type": "progress", "trace_id": session_id, "component": "AgentCore / MCP",
-                             "operation": operation, "status": "RUNNING", "message": "Connecting to CareCircle",
+                             "operation": operation, "status": "RUNNING", "message": "Connecting to Den",
                              "timestamp": datetime.now(timezone.utc).isoformat()})
             invocation_started_at = monotonic()
             call = asyncio.create_task(asyncio.to_thread(backend.call, operation, arguments))

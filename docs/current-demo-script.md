@@ -1,10 +1,10 @@
-# CareCircle current voice demo script
+# Den current voice demo script
 
 This script matches the synthetic `demo-household` seed and the current browser, Supervisor, action policy, and voice builders. Run `PYTHONPATH=src .venv/bin/python scripts/reset_voice_demo.py --apply` and reload the browser before starting. Wait for each result and its progress trace before the next line. Say the quoted text exactly, or type it in the fallback field. The reset leaves Dad's morning dose unconfirmed, the walk unobserved, the simulated kitchen plug on, Maya unavailable, John on call, and cardiology at 14:30. The script uses one incident throughout.
 
 ## 1. Morning briefing
 
-- **Say:** “CareCircle, how is Dad doing this morning?”
+- **Say:** “Den, how is Dad doing this morning?”
 - **Route / public MCP:** deterministic `BRIEFING` → `get_household_briefing`.
 - **Agents / private tools:** Supervisor briefing; Medication Agent (`get_medication_schedule`, `get_dose_history`, `find_missed_doses`, `get_medication_inventory`), Home Safety Agent (`run_home_safety_sweep`, Ring/entry, smoke/CO, plug reads), Care Coordinator Agent (`get_care_team`), and Logistics & Routine Agent (`get_upcoming_appointments`, `get_daily_routine`, `get_pharmacy_details`).
 - **Speech:** Natural summary of unconfirmed medication and missing walk, normal smoke/CO, plug still on, Maya unavailable and John available, and cardiology at 2:30 PM. No safety questionnaire.

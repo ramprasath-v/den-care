@@ -51,7 +51,7 @@ const context = vm.createContext({
     if (url === '/api/speak') {
       assert.equal(progressSettling, false, 'speech must wait for the SSE completion barrier');
       assert.equal(vm.runInContext('busy', context), false, 'speech must start after working=false');
-      assert.equal(element('#working-label-text').textContent, 'CareCircle is ready');
+      assert.equal(element('#working-label-text').textContent, 'Den is ready');
       assert.equal(element('#working-spinner').hidden, true, 'speech must start after the spinner stops');
       spoken.push(body.text);
       return {ok: true, blob: async () => Buffer.from('audio')};
@@ -207,7 +207,7 @@ async function main() {
     return;
   }
   const briefingPhrases = [
-    'CareCircle, how is Dad doing this morning?', 'How is Dad doing?',
+    'Den, how is Dad doing this morning?', 'How is Dad doing?',
     'How is Dad doing today?', "How's Dad?", "Give me Dad's morning briefing.",
     "What's going on with Dad today?", 'Can you give me an update on Dad?',
   ];

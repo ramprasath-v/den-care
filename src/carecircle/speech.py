@@ -103,4 +103,4 @@ class AmazonPollyProvider:
             content = stream.read()
         if not content:
             raise RuntimeError("EmptyPollyAudio")
-        return SpokenAudio(content, "audio/mpeg", "Ruth (CareCircle voice)", round((perf_counter() - started) * 1000, 2))
+        return SpokenAudio(content, "audio/mpeg", "Ruth (Den voice)", round((perf_counter() - started) * 1000, 2))

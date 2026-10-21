@@ -1,10 +1,10 @@
-# CareCircle full-build source-of-truth inventory
+# Den full-build source-of-truth inventory
 
 The implementation defines exactly six agent roles:
 
 | Agent | Implementation | Local status |
 | --- | --- | --- |
-| CareCircle Supervisor | `src/carecircle/full_supervisor.py`, `src/carecircle/strands_orchestration.py` | COMPLETE |
+| Den Supervisor (internal component: `CareCircle Supervisor`) | `src/carecircle/full_supervisor.py`, `src/carecircle/strands_orchestration.py` | COMPLETE |
 | Triage Agent | `src/carecircle/agents/triage.py`, `src/carecircle/internal_tools.py` | COMPLETE |
 | Medication Agent | `src/carecircle/agents/medication.py`, `src/carecircle/internal_tools.py` | COMPLETE |
 | Home Safety Agent | `src/carecircle/full_supervisor.py`, `src/carecircle/internal_tools.py` | COMPLETE |

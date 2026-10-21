@@ -20,7 +20,15 @@ async def test_alexa_simulator_proxies_to_remote_without_browser_credentials():
         page = await client.get("/")
         assert page.status_code == 200
         assert "Execution trace" in page.text and "Approve" in page.text
+        assert "<h1>Den</h1>" in page.text
+        assert "Den — care coordination for home and family." in page.text
+        assert "Den, how is Dad doing this morning?" in page.text
+        assert "CareCircle" not in page.text
         assert "AWS_SECRET_ACCESS_KEY" not in page.text
+        script = await client.get("/app.js")
+        assert script.status_code == 200
+        assert '"Den is working"' in script.text
+        assert '"Den Supervisor"' in script.text
         result = await client.post("/api/mcp", json={"operation": "get_household_briefing", "arguments": {"household_id": "demo-household"}})
         assert result.status_code == 200
         assert remote.calls == [("get_household_briefing", {"household_id": "demo-household"})]
