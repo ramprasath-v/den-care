@@ -13,7 +13,13 @@ The full build was deployed and verified in `us-east-1` on 2026-09-20. The exist
 
 The public repository is licensed under the [MIT License](LICENSE). Direct third-party components remain under their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Submission product feedback is in [docs/product-feedback.md](docs/product-feedback.md), and presenter/Devpost checks are in [SUBMISSION_CHECKLIST.md](SUBMISSION_CHECKLIST.md).
 
-## Live architecture
+## Architecture
+
+![Den architecture](docs/images/den-architecture.png)
+
+Den separates the caregiver-facing App Runner client from the IAM-authenticated AgentCore MCP runtime. Strands and Claude provide advisory planning and structured signal extraction, while deterministic Python owns safety rules, approvals, state changes, and external-action boundaries.
+
+### Detailed flow
 
 ```text
 Chrome browser over App Runner HTTPS
